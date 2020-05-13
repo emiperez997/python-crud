@@ -27,13 +27,45 @@ ciudad = StringVar()
 # Metodos
 # ----------------------------------------------------------
 def insertarUsuario():
+    miConexion = sqlite3.connect("Usuarios")
+    miCursor = miConexion.cursor()
+
+    gen = StringVar()
+    print(opcionGenero.get())
+
+    if opcionGenero.get() == 1:
+        gen.set("Masculino")
+    else:
+        gen.set("Femenino")
+
+    datos = (usuario.get(), password.get(), gen.get(), ciudad.get())
+
+    print(datos)
+    try:
+        miCursor.execute("INSERT INTO USUARIOS VALUES(NULL, ?, ?, ?, ?)", datos)
+
+        miConexion.commit()
+
+        messagebox.showinfo("Base de Datos", "Registro insertado con éxito")
     
+    except:
+        messagebox.showerror("Error!", "Oops! Algo salió mal")
+    
+    finally:
+        miConexion.close()
+
 
 def verLicencia():
     messagebox.showinfo("Licencia", "Producto bajo licencia GNU")
 
 def acercaDe():
     messagebox.showinfo("Acerca de...", "Sistema CRUD \nVersion: 1.0")
+
+def borrarCampos():
+    usuario.set("") 
+    password.set("") 
+    genero.set("") 
+    ciudad.set("") 
 
 
 # ----------------------------------------------------------
@@ -43,13 +75,14 @@ barraMenu = Menu(root)
 root.config(menu = barraMenu, width = 300, height = 300)
 
 bbddMenu = Menu(barraMenu, tearoff = 0)
-bbddMenu.add_command(label = "Conectar", command = db.conectarBBDD)
+bbddMenu.add_command(label = "Crear Conexion", command = db.conectarBBDD)
 bbddMenu.add_command(label = "Comprobar Conexion", command = db.compruebaDB)
+bbddMenu.add_command(label = "Comprobar Estado", command = db.estadoDB)
 bbddMenu.add_separator()
 bbddMenu.add_command(label = "Salir")
 
 crudMenu = Menu(barraMenu, tearoff = 0)
-crudMenu.add_command(label = "Insertar")
+crudMenu.add_command(label = "Insertar", command = insertarUsuario)
 crudMenu.add_command(label = "Leer")
 crudMenu.add_command(label = "Actualizar")
 crudMenu.add_command(label = "Eliminar")
@@ -91,7 +124,7 @@ Radiobutton(frame, text = "Femenino", variable = opcionGenero, value = 2).place(
 ciudadLabel = Label(frame, text = "Ciudad: ").place(x = 30, y = 185)
 ciudadEntry = Entry(frame, textvariable = ciudad).place(x = 110, y = 185)
 
-createButton = Button(frame, text = "Insertar").place(x = 30, y = 235)
+createButton = Button(frame, text = "Insertar", command = insertarUsuario).place(x = 30, y = 235)
 readButton = Button(frame, text = "Leer").place(x = 90, y = 235)
 updateButton = Button(frame, text = "Actualizar").place(x = 135, y = 235)
 deleteButton = Button(frame, text = "Eliminar").place(x = 210, y = 235)

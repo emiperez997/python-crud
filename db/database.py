@@ -37,3 +37,20 @@ def compruebaDB():
     else:
         messagebox.showwarning("Advertencia", "No está conectada")
 
+def estadoDB():
+
+    miConexion = sqlite3.connect("Usuarios")
+    miCursor = miConexion.cursor()
+
+    miCursor.execute("SELECT count(ID) FROM USUARIOS")
+
+    registros = miCursor.fetchall()
+
+    for i in registros:
+        if i[0] == 0:
+            messagebox.showinfo("Estado", "Sin registros")
+        
+        else:
+            messagebox.showinfo("Estado", "Registros: " + str(i[0]))
+    
+    miConexion.close()
