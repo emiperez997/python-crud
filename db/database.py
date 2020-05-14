@@ -58,16 +58,26 @@ def estadoDB():
 
 def contadorID():
 
-    miConexion = sqlite3.connect("Usuarios")
-    miCursor = miConexion.cursor()
+    fileObj = Path(r"./Usuarios")
+    if fileObj.is_file():
+        miConexion = sqlite3.connect("Usuarios")
+        miCursor = miConexion.cursor()
 
-    miCursor.execute("SELECT count(ID) FROM USUARIOS")
+        miCursor.execute("SELECT ID FROM USUARIOS ORDER BY ID")
 
-    registros = miCursor.fetchall()
-    miConexion.close()
+        registros = miCursor.fetchall()
+        print(registros[len(registros) - 1])
+        miConexion.close()
 
-    for i in registros:
-        contador = i[0]
+        for i in registros:
+            contador = i[0]
 
-    return contador + 1
+        return contador + 1
     
+    else:
+        return 1
+    
+# -------------------------------------------
+# CRUD
+# -------------------------------------------
+

@@ -3,6 +3,7 @@
 # ----------------------------------------------------------
 from tkinter import *
 from tkinter import messagebox
+from tkinter import simpledialog
 import sqlite3
 import db.database as db
 
@@ -26,37 +27,142 @@ usuario = StringVar()
 password = StringVar()
 genero = StringVar()
 ciudad = StringVar()
+actualizable = BooleanVar()
+actualizable.set(False)
 
 # ----------------------------------------------------------
 # Metodos
 # ----------------------------------------------------------
+
 def insertarUsuario():
     miConexion = sqlite3.connect("Usuarios")
     miCursor = miConexion.cursor()
 
     gen = StringVar()
-    print(opcionGenero.get())
 
     if opcionGenero.get() == 1:
         gen.set("Masculino")
     else:
         gen.set("Femenino")
 
-    datos = (usuario.get(), password.get(), gen.get(), ciudad.get())
 
-    print(datos)
-    try:
-        miCursor.execute("INSERT INTO USUARIOS VALUES(NULL, ?, ?, ?, ?)", datos)
+    if usuario.get() != '' and password.get() != '' and ciudad.get() != '':
+        datos = (usuario.get(), password.get(), gen.get(), ciudad.get())
 
+        try:
+            miCursor.execute("INSERT INTO USUARIOS VALUES(NULL, ?, ?, ?, ?)", datos)
+
+            miConexion.commit()
+
+            messagebox.showinfo("Base de Datos", "Registro insertado con éxito")
+        
+        except:
+            messagebox.showerror("Error!", "Oops! Algo salió mal")
+        
+        finally:
+            miConexion.close()
+            borrarCampos()
+    else:
+        messagebox.showwarning("Advertencia", "Todos los campos deben ser rellenados")
+
+def leerUsuario():
+    miConexion = sqlite3.connect("Usuarios")
+    miCursor = miConexion.cursor()
+
+    buscar_usuario = simpledialog.askstring('Buscar Usuario', 'Ingrese el nombre de usuario: ')
+
+    if buscar_usuario is not None:
+        miCursor.execute("SELECT ID, USUARIO, CONTRASENA, GENERO, CIUDAD FROM USUARIOS WHERE USUARIO = '" + buscar_usuario + "'")
+
+        usuario_encontrado = miCursor.fetchall()
+
+        if usuario_encontrado != []:
+            messagebox.showinfo("Usuario encontrado", usuario_encontrado)
+            
+            miConexion.close()
+        
+        else:
+            messagebox.showwarning("Error", "Usuario no encontrado")
+
+def obtenerDatos():
+    miConexion = sqlite3.connect("Usuarios")
+    miCursor = miConexion.cursor()
+
+    buscar_usuario = simpledialog.askstring('Actualizar Usuario', 'Ingrese el nombre de usuario: ')
+
+    if buscar_usuario is not None:
+        miCursor.execute("SELECT ID, USUARIO, CONTRASENA, GENERO, CIUDAD FROM USUARIOS WHERE USUARIO = '" + buscar_usuario + "'")
+
+        usuario_encontrado = miCursor.fetchall()
+
+        if usuario_encontrado != []:
+            for usuario_db in usuario_encontrado:
+                idContador.set(usuario_db[0])
+                usuario.set(usuario_db[1])
+                password.set(usuario_db[2])
+                if usuario_db[3] == 'Masculino':
+                    opcionGenero.set(1)
+                elif usuario_db[3] == 'Femenino':
+                    opcionGenero.set(2)
+                ciudad.set(usuario_db[4])
+            
+            actualizable.set(True)
+            
+            miConexion.close()
+        
+        else:
+            messagebox.showwarning("Error", "Usuario no encontrado")
+
+
+def actualizarUsuario():
+
+    if actualizable.get() == False:
+        obtenerDatos()
+    else:
+        
+        miConexion = sqlite3.connect("Usuarios")
+        miCursor = miConexion.cursor()
+
+        gen = StringVar()
+
+        if opcionGenero.get() == 1:
+            gen.set("Masculino")
+        else:
+            gen.set("Femenino")
+
+
+        if usuario.get() != '' and password.get() != '' and ciudad.get() != '' and actualizable:
+            datos = (usuario.get(), password.get(), gen.get(), ciudad.get())
+
+            try:
+                miCursor.execute("UPDATE USUARIOS SET USUARIO = ?, CONTRASENA = ?, GENERO = ?, CIUDAD = ? WHERE ID = " + idContador.get(), datos)
+
+                miConexion.commit()
+
+                messagebox.showinfo("Base de Datos", "Registro actualizado con éxito")
+            
+            except:
+                messagebox.showerror("Error!", "Oops! Algo salió mal")
+            
+            finally:
+                miConexion.close()
+                borrarCampos()
+        else:
+            messagebox.showwarning("Advertencia", "Todos los campos deben ser rellenados")
+    
+def eliminarUsuario():
+    miConexion = sqlite3.connect("Usuarios")
+    miCursor = miConexion.cursor()
+
+    buscar_usuario = simpledialog.askstring("Eliminar Usuario", "Ingrese el nombre de usuario a eliminar: ")
+
+    if buscar_usuario is not None:
+        miCursor.execute("DELETE FROM USUARIOS WHERE USUARIO = '" + buscar_usuario + "'")
         miConexion.commit()
 
-        messagebox.showinfo("Base de Datos", "Registro insertado con éxito")
+        messagebox.showinfo("Eliminado", "Usuario eliminado con exito")
     
-    except:
-        messagebox.showerror("Error!", "Oops! Algo salió mal")
-    
-    finally:
-        miConexion.close()
+    miConexion.close()
 
 
 def verLicencia():
@@ -71,6 +177,7 @@ def borrarCampos():
     password.set("") 
     opcionGenero.set(None) 
     ciudad.set("") 
+    actualizable = False
 
 
 # ----------------------------------------------------------
@@ -88,9 +195,9 @@ bbddMenu.add_command(label = "Salir")
 
 crudMenu = Menu(barraMenu, tearoff = 0)
 crudMenu.add_command(label = "Insertar", command = insertarUsuario)
-crudMenu.add_command(label = "Leer")
-crudMenu.add_command(label = "Actualizar")
-crudMenu.add_command(label = "Eliminar")
+crudMenu.add_command(label = "Leer", command = leerUsuario)
+crudMenu.add_command(label = "Actualizar", command = actualizarUsuario)
+crudMenu.add_command(label = "Eliminar", command = eliminarUsuario)
 
 ayudaMenu = Menu(barraMenu, tearoff = 0)
 ayudaMenu.add_command(label = "Ver Licencia", command = verLicencia)
@@ -130,9 +237,9 @@ ciudadLabel = Label(frame, text = "Ciudad: ").place(x = 30, y = 185)
 ciudadEntry = Entry(frame, textvariable = ciudad).place(x = 110, y = 185)
 
 createButton = Button(frame, text = "Insertar", command = insertarUsuario).place(x = 30, y = 235)
-readButton = Button(frame, text = "Leer").place(x = 90, y = 235)
-updateButton = Button(frame, text = "Actualizar").place(x = 135, y = 235)
-deleteButton = Button(frame, text = "Eliminar").place(x = 210, y = 235)
+readButton = Button(frame, text = "Leer", command = leerUsuario).place(x = 90, y = 235)
+updateButton = Button(frame, text = "Actualizar", command = actualizarUsuario).place(x = 135, y = 235)
+deleteButton = Button(frame, text = "Eliminar", command = eliminarUsuario).place(x = 210, y = 235)
 
 # ----------------------------------------------------------
 # mainloop
