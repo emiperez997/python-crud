@@ -54,3 +54,20 @@ def estadoDB():
             messagebox.showinfo("Estado", "Registros: " + str(i[0]))
     
     miConexion.close()
+
+
+def contadorID():
+
+    miConexion = sqlite3.connect("Usuarios")
+    miCursor = miConexion.cursor()
+
+    miCursor.execute("SELECT count(ID) FROM USUARIOS")
+
+    registros = miCursor.fetchall()
+    miConexion.close()
+
+    for i in registros:
+        contador = i[0]
+
+    return contador + 1
+    

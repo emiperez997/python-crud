@@ -15,8 +15,12 @@ root.resizable(0, 0)
 
 # ----------------------------------------------------------
 # Variables
-# ----------------------------------------------------------
-idContador = IntVar()
+# -----------------------------------------------------------
+
+print()
+
+idContador = StringVar()
+idContador.set(str(db.contadorID()))
 opcionGenero = IntVar()
 usuario = StringVar()
 password = StringVar()
@@ -62,9 +66,10 @@ def acercaDe():
     messagebox.showinfo("Acerca de...", "Sistema CRUD \nVersion: 1.0")
 
 def borrarCampos():
+    idContador.set(str(db.contadorID()))
     usuario.set("") 
     password.set("") 
-    genero.set("") 
+    opcionGenero.set(None) 
     ciudad.set("") 
 
 
@@ -107,7 +112,7 @@ frame.pack()
 titulo = Label(frame, text = "Bienvenido a nuestro sistema CRUD").place(x = 50, y = 10)
 
 idLabel = Label(frame, text = "ID: ").place(x = 30, y = 40)
-idCount = Label(frame, textvariable = idContador)
+idCount = Label(frame, textvariable = idContador).place(x = 110, y = 40)
 
 usuarioLabel = Label(frame, text = "Usuario: ").place(x = 30, y = 70)
 usuarioEntry = Entry(frame, textvariable = usuario).place(x = 110, y = 70)
