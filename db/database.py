@@ -39,40 +39,43 @@ def compruebaDB():
 
 def estadoDB():
 
-    miConexion = sqlite3.connect("Usuarios")
-    miCursor = miConexion.cursor()
+    fileObj = Path(r"./Usuarios")
+    if fileObj.is_file():
+        miConexion = sqlite3.connect("Usuarios")
+        miCursor = miConexion.cursor()
 
-    miCursor.execute("SELECT count(ID) FROM USUARIOS")
+        miCursor.execute("SELECT count(ID) FROM USUARIOS")
 
-    registros = miCursor.fetchall()
+        registros = miCursor.fetchall()
 
-    for i in registros:
-        if i[0] == 0:
-            messagebox.showinfo("Estado", "Sin registros")
+        for i in registros:
+            if i[0] == 0:
+                messagebox.showinfo("Estado", "Sin registros")
+            
+            else:
+                messagebox.showinfo("Estado", "Registros: " + str(i[0]))
         
-        else:
-            messagebox.showinfo("Estado", "Registros: " + str(i[0]))
-    
-    miConexion.close()
+        miConexion.close()
+    else:
+        messagebox.showwarning("Advertencia", "Base de Datos no está conectada")
 
 
 def contadorID():
-
     fileObj = Path(r"./Usuarios")
-    if fileObj.is_file():
+
+    if fileObj.exists() == True:
         miConexion = sqlite3.connect("Usuarios")
         miCursor = miConexion.cursor()
 
         miCursor.execute("SELECT ID FROM USUARIOS ORDER BY ID")
 
         registros = miCursor.fetchall()
-        print(registros[len(registros) - 1])
         miConexion.close()
-
+        
         for i in registros:
             contador = i[0]
 
-        return contador + 1
+        return contador
     
     else:
         return 1

@@ -2,10 +2,11 @@
 # Imports
 # ----------------------------------------------------------
 from tkinter import *
-from tkinter import messagebox
-from tkinter import simpledialog
 import sqlite3
 import db.database as db
+from pathlib import Path
+from tkinter import messagebox
+from tkinter import simpledialog
 
 # ----------------------------------------------------------
 # root
@@ -15,10 +16,18 @@ root.title("Sistema CRUD")
 root.resizable(0, 0)
 
 # ----------------------------------------------------------
+# Inicializacion
+# -----------------------------------------------------------
+def inicio():
+    # messagebox.showinfo("Bienvenida", "Bienvenido a la Aplicación")
+
+    fileObj = Path(r"./Usuarios")
+    if fileObj.exists() == False:
+        messagebox.showwarning("Advertencia", "Base de Datos no está conectada")
+
+# ----------------------------------------------------------
 # Variables
 # -----------------------------------------------------------
-
-print()
 
 idContador = StringVar()
 idContador.set(str(db.contadorID()))
@@ -35,54 +44,71 @@ actualizable.set(False)
 # ----------------------------------------------------------
 
 def insertarUsuario():
-    miConexion = sqlite3.connect("Usuarios")
-    miCursor = miConexion.cursor()
 
-    gen = StringVar()
+    fileObj = Path(r"./Usuarios")
+    if fileObj.exists() == False:
+        messagebox.showwarning("Advertencia", "Base de Datos no está conectada")
+        borrarCampos()
 
-    if opcionGenero.get() == 1:
-        gen.set("Masculino")
+    elif actualizable == True:
+        messagebox.showwarning("Advertencia", "Debe actualizar ")
+
+
     else:
-        gen.set("Femenino")
+        miConexion = sqlite3.connect("Usuarios")
+        miCursor = miConexion.cursor()
 
+        if usuario.get() != '' and password.get() != '' and ciudad.get() != '' and opcionGenero.get() is not None and actualizable:
+            gen = StringVar()
 
-    if usuario.get() != '' and password.get() != '' and ciudad.get() != '':
-        datos = (usuario.get(), password.get(), gen.get(), ciudad.get())
+            if opcionGenero.get() == 1:
+                gen.set("Masculino")
+            else:
+                gen.set("Femenino")
 
-        try:
-            miCursor.execute("INSERT INTO USUARIOS VALUES(NULL, ?, ?, ?, ?)", datos)
+            datos = (usuario.get(), password.get(), gen.get(), ciudad.get())
 
-            miConexion.commit()
+            try:
+                miCursor.execute("INSERT INTO USUARIOS VALUES(NULL, ?, ?, ?, ?)", datos)
+                miConexion.commit()
 
-            messagebox.showinfo("Base de Datos", "Registro insertado con éxito")
-        
-        except:
-            messagebox.showerror("Error!", "Oops! Algo salió mal")
-        
-        finally:
-            miConexion.close()
-            borrarCampos()
-    else:
-        messagebox.showwarning("Advertencia", "Todos los campos deben ser rellenados")
+                messagebox.showinfo("Base de Datos", "Registro insertado con éxito")
+            
+            except:
+                messagebox.showerror("Error!", "Oops! Algo salió mal")
+            
+            finally:
+                miConexion.close()
+                borrarCampos()
+        else:
+            messagebox.showwarning("Advertencia", "Todos los campos deben ser rellenados")
 
 def leerUsuario():
-    miConexion = sqlite3.connect("Usuarios")
-    miCursor = miConexion.cursor()
 
-    buscar_usuario = simpledialog.askstring('Buscar Usuario', 'Ingrese el nombre de usuario: ')
+    fileObj = Path(r"./Usuarios")
+    if fileObj.exists() == False:
+        messagebox.showwarning("Advertencia", "Base de Datos no está conectada")
+        borrarCampos()
 
-    if buscar_usuario is not None:
-        miCursor.execute("SELECT ID, USUARIO, CONTRASENA, GENERO, CIUDAD FROM USUARIOS WHERE USUARIO = '" + buscar_usuario + "'")
+    else:
+    
+        miConexion = sqlite3.connect("Usuarios")
+        miCursor = miConexion.cursor()
 
-        usuario_encontrado = miCursor.fetchall()
+        buscar_usuario = simpledialog.askstring('Buscar Usuario', 'Ingrese el nombre de usuario: ')
 
-        if usuario_encontrado != []:
-            messagebox.showinfo("Usuario encontrado", usuario_encontrado)
+        if buscar_usuario is not None:
+            miCursor.execute("SELECT ID, USUARIO, CONTRASENA, GENERO, CIUDAD FROM USUARIOS WHERE USUARIO = '" + buscar_usuario + "'")
+
+            usuario_encontrado = miCursor.fetchall()
+
+            if usuario_encontrado != []:
+                messagebox.showinfo("Usuario encontrado", usuario_encontrado)
+                
+                miConexion.close()
             
-            miConexion.close()
-        
-        else:
-            messagebox.showwarning("Error", "Usuario no encontrado")
+            else:
+                messagebox.showwarning("Error", "Usuario no encontrado")
 
 def obtenerDatos():
     miConexion = sqlite3.connect("Usuarios")
@@ -116,53 +142,65 @@ def obtenerDatos():
 
 def actualizarUsuario():
 
-    if actualizable.get() == False:
-        obtenerDatos()
+    fileObj = Path(r"./Usuarios")
+    if fileObj.exists() == False:
+        messagebox.showwarning("Advertencia", "Base de Datos no está conectada")
+        borrarCampos()
+    
     else:
-        
+        if actualizable.get() == False:
+            obtenerDatos()
+        else:
+            
+            miConexion = sqlite3.connect("Usuarios")
+            miCursor = miConexion.cursor()
+
+            if usuario.get() != '' and password.get() != '' and ciudad.get() != '' and opcionGenero.get() is not None and actualizable:
+                gen = StringVar()
+
+                if opcionGenero.get() == 1:
+                    gen.set("Masculino")
+                else:
+                    gen.set("Femenino")
+
+                datos = (usuario.get(), password.get(), gen.get(), ciudad.get())
+
+                try:
+                    miCursor.execute("UPDATE USUARIOS SET USUARIO = ?, CONTRASENA = ?, GENERO = ?, CIUDAD = ? WHERE ID = " + idContador.get(), datos)
+
+                    miConexion.commit()
+
+                    messagebox.showinfo("Base de Datos", "Registro actualizado con éxito")
+                
+                except:
+                    messagebox.showerror("Error!", "Oops! Algo salió mal")
+                
+                finally:
+                    miConexion.close()
+                    borrarCampos()
+            else:
+                messagebox.showwarning("Advertencia", "Todos los campos deben ser rellenados")
+    
+def eliminarUsuario():
+
+    fileObj = Path(r"./Usuarios")
+    if fileObj.exists() == False:
+        messagebox.showwarning("Advertencia", "Base de Datos no está conectada")
+        borrarCampos()
+    
+    else:
         miConexion = sqlite3.connect("Usuarios")
         miCursor = miConexion.cursor()
 
-        gen = StringVar()
+        buscar_usuario = simpledialog.askstring("Eliminar Usuario", "Ingrese el nombre de usuario a eliminar: ")
 
-        if opcionGenero.get() == 1:
-            gen.set("Masculino")
-        else:
-            gen.set("Femenino")
+        if buscar_usuario is not None:
+            miCursor.execute("DELETE FROM USUARIOS WHERE USUARIO = '" + buscar_usuario + "'")
+            miConexion.commit()
 
-
-        if usuario.get() != '' and password.get() != '' and ciudad.get() != '' and actualizable:
-            datos = (usuario.get(), password.get(), gen.get(), ciudad.get())
-
-            try:
-                miCursor.execute("UPDATE USUARIOS SET USUARIO = ?, CONTRASENA = ?, GENERO = ?, CIUDAD = ? WHERE ID = " + idContador.get(), datos)
-
-                miConexion.commit()
-
-                messagebox.showinfo("Base de Datos", "Registro actualizado con éxito")
-            
-            except:
-                messagebox.showerror("Error!", "Oops! Algo salió mal")
-            
-            finally:
-                miConexion.close()
-                borrarCampos()
-        else:
-            messagebox.showwarning("Advertencia", "Todos los campos deben ser rellenados")
-    
-def eliminarUsuario():
-    miConexion = sqlite3.connect("Usuarios")
-    miCursor = miConexion.cursor()
-
-    buscar_usuario = simpledialog.askstring("Eliminar Usuario", "Ingrese el nombre de usuario a eliminar: ")
-
-    if buscar_usuario is not None:
-        miCursor.execute("DELETE FROM USUARIOS WHERE USUARIO = '" + buscar_usuario + "'")
-        miConexion.commit()
-
-        messagebox.showinfo("Eliminado", "Usuario eliminado con exito")
-    
-    miConexion.close()
+            messagebox.showinfo("Eliminado", "Usuario eliminado con exito")
+        
+        miConexion.close()
 
 
 def verLicencia():
@@ -242,6 +280,7 @@ updateButton = Button(frame, text = "Actualizar", command = actualizarUsuario).p
 deleteButton = Button(frame, text = "Eliminar", command = eliminarUsuario).place(x = 210, y = 235)
 
 # ----------------------------------------------------------
-# mainloop
+# mainloop e inicio
 # ----------------------------------------------------------
+inicio()
 root.mainloop()
