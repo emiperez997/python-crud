@@ -37,3 +37,50 @@ def compruebaDB():
     else:
         messagebox.showwarning("Advertencia", "No está conectada")
 
+def estadoDB():
+
+    fileObj = Path(r"./Usuarios")
+    if fileObj.is_file():
+        miConexion = sqlite3.connect("Usuarios")
+        miCursor = miConexion.cursor()
+
+        miCursor.execute("SELECT count(ID) FROM USUARIOS")
+
+        registros = miCursor.fetchall()
+
+        for i in registros:
+            if i[0] == 0:
+                messagebox.showinfo("Estado", "Sin registros")
+            
+            else:
+                messagebox.showinfo("Estado", "Registros: " + str(i[0]))
+        
+        miConexion.close()
+    else:
+        messagebox.showwarning("Advertencia", "Base de Datos no está conectada")
+
+
+def contadorID():
+    fileObj = Path(r"./Usuarios")
+
+    if fileObj.exists() == True:
+        miConexion = sqlite3.connect("Usuarios")
+        miCursor = miConexion.cursor()
+
+        miCursor.execute("SELECT ID FROM USUARIOS ORDER BY ID")
+
+        registros = miCursor.fetchall()
+        miConexion.close()
+        
+        for i in registros:
+            contador = i[0]
+
+        return contador + 1
+    
+    else:
+        return 1
+    
+# -------------------------------------------
+# CRUD
+# -------------------------------------------
+
