@@ -75,7 +75,7 @@ def contadorID():
         for i in registros:
             contador = i[0]
 
-        return contador
+        return contador + 1
     
     else:
         return 1

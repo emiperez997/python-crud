@@ -50,9 +50,8 @@ def insertarUsuario():
         messagebox.showwarning("Advertencia", "Base de Datos no está conectada")
         borrarCampos()
 
-    elif actualizable == True:
-        messagebox.showwarning("Advertencia", "Debe actualizar ")
-
+    elif actualizable.get() == True:
+        messagebox.showwarning("Advertencia", "Está en modo actualizar")
 
     else:
         miConexion = sqlite3.connect("Usuarios")
@@ -109,6 +108,48 @@ def leerUsuario():
             
             else:
                 messagebox.showwarning("Error", "Usuario no encontrado")
+
+def leerTodo():
+
+    fileObj = Path(r"./Usuarios")
+    if fileObj.exists() == False:
+        messagebox.showwarning("Advertencia", "Base de Datos no está conectada")
+        borrarCampos()
+
+    else:
+    
+        miConexion = sqlite3.connect("Usuarios")
+        miCursor = miConexion.cursor()
+        miCursor.execute("SELECT ID, USUARIO, CONTRASENA, GENERO, CIUDAD FROM USUARIOS ORDER BY ID")
+
+        usuarios_encontrados = miCursor.fetchall()
+
+        if usuarios_encontrados != []:
+            ventana = Toplevel(root)
+            ventana.resizable(0, 0)
+
+            Label(ventana, text = "Usuarios", font = ("Verdana", 10)).grid(row = 0, columnspan = 4)
+
+            
+            Label(ventana, text = "ID").grid(row = 1, column = 0, pady = 5)
+            Label(ventana, text = "Usuario").grid(row = 1, column = 1, pady = 5)
+            Label(ventana, text = "Genero").grid(row = 1, column = 2, pady = 5)
+            Label(ventana, text = "Ciudad").grid(row = 1, column = 3, pady = 5)
+
+            contador = 2
+
+            for usuario in usuarios_encontrados:
+                Label(ventana, text = str(usuario[0])).grid(row = contador, column = 0, pady = 5)
+                Label(ventana, text = usuario[1]).grid(row = contador, column = 1, pady = 5)
+                Label(ventana, text = usuario[3]).grid(row = contador, column = 2, pady = 5)
+                Label(ventana, text = usuario[4]).grid(row = contador, column = 3, pady = 5)
+                contador += 1
+                
+                
+            miConexion.close()
+            
+        else:
+            messagebox.showwarning("Error", "Oops! Algo salió mal")
 
 def obtenerDatos():
     miConexion = sqlite3.connect("Usuarios")
@@ -215,7 +256,7 @@ def borrarCampos():
     password.set("") 
     opcionGenero.set(None) 
     ciudad.set("") 
-    actualizable = False
+    actualizable.set(False)
 
 
 # ----------------------------------------------------------
@@ -234,6 +275,7 @@ bbddMenu.add_command(label = "Salir")
 crudMenu = Menu(barraMenu, tearoff = 0)
 crudMenu.add_command(label = "Insertar", command = insertarUsuario)
 crudMenu.add_command(label = "Leer", command = leerUsuario)
+crudMenu.add_command(label = "Leer Todo", command = leerTodo)
 crudMenu.add_command(label = "Actualizar", command = actualizarUsuario)
 crudMenu.add_command(label = "Eliminar", command = eliminarUsuario)
 
@@ -254,7 +296,7 @@ frame = Frame()
 frame.config(width = "300", height = "280")
 frame.pack()
 
-titulo = Label(frame, text = "Bienvenido a nuestro sistema CRUD").place(x = 50, y = 10)
+titulo = Label(frame, text = "Sistema CRUD", font = ("Verdana", 10)).place(x = 100, y = 10)
 
 idLabel = Label(frame, text = "ID: ").place(x = 30, y = 40)
 idCount = Label(frame, textvariable = idContador).place(x = 110, y = 40)
