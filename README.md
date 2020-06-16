@@ -1,6 +1,6 @@
-# Proyecto_1
+# Proyecto 1
 
-## Proyecto CRUD hecho con Python y Tkinter
+## Prrimer proyecto CRUD hecho con Python y Tkinter
 
 ### ¿Qué es crud?
 **Crud** viene de las palabras _Create_, _Read_, _Update_, _Delete_
